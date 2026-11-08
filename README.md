@@ -2,7 +2,7 @@
 
 **Java 后端工程师：把一套系统从设计做到上线，并让它的行为可被审计。**
 
-5 年 Java，金融交易系统出身。近一年在做 AI 系统里不性感的那一半 —— 让模型行为可复现到能放进 CI 流水线的程度：评测集、决策网关、审计链路，以及让它们保持诚实的运维管道。
+5 年 Java，金融交易系统出身。近一年主要做 LLM 应用的工程落地：给模型输出建评测集、把判定结果做成可缓存可审计的网关、用 OpenTelemetry 打通调用链路。只盯两件事 —— 同一个输入跑两次结果能对上，改一次 prompt 能在 CI 里看到指标变化。
 
 主力是 Java；Python / Go / React 侧在 AI 协作下交付，能读懂、能修改、能排障。
 
@@ -66,12 +66,14 @@ OpenTelemetry + Jaeger。**一个人从 0 做到上线并持续运维**，语言
 
 ### Java backend engineer — I take a system from design to production and keep its behaviour auditable.
 
-Five years of Java, starting in securities trading systems. For the past year I've been building the
-unglamorous half of AI systems: the part that makes model behaviour reproducible enough to put in a
-CI pipeline — evaluation sets, decision gateways, audit trails, and the ops plumbing that keeps it honest.
+Five years of Java, starting in securities trading systems. For the past year I've been doing
+engineering work on LLM applications: evaluation sets for model output, a decision gateway that
+caches and audits every verdict, and OpenTelemetry tracing through the whole call path. Two things
+I actually care about — the same input twice gives the same result, and changing a prompt shows up
+as a number in CI.
 
-Java is my main stack. The Python / Go / React side gets delivered with AI in the loop: I can read it,
-change it, and debug it.
+Java is my main stack. The Python / Go / React side gets delivered with AI in the loop: I can read
+it, change it, and debug it.
 
 Based in Guangzhou (UTC+8) · English working environment · open to remote collaboration
 
