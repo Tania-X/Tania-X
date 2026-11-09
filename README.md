@@ -1,134 +1,84 @@
 # 粟思源 / Max
 
-**Java 后端工程师：把一套系统从设计做到上线，并让它的行为可被审计。**
+**Java 后端工程师 · 5 年 · 券商交易系统出身**
 
-5 年 Java，金融交易系统出身。近一年主要做 LLM 应用的工程落地：给模型输出建评测集、把判定结果做成可缓存可审计的网关、用 OpenTelemetry 打通调用链路。只盯两件事 —— 同一个输入跑两次结果能对上，改一次 prompt 能在 CI 里看到指标变化。
+5 年 Java，主要在券商做交易系统（场务端）：改过服务架构，重建过权限体系，也把国产化替换用生产流量做过并行验证。
+2026 年起做 DevOps 平台和 LLM 应用落地。
 
-主力是 Java；Python / Go / React 侧在 AI 协作下交付，能读懂、能修改、能排障。
+我关心的两件事：同一个输入跑两次，结果要对得上；改了一次 prompt，指标要在 CI 里看得见变化。
 
-广州（UTC+8）· 全英文工作环境 · 可远程
+主力是 Java。Python / Go / React 侧在 AI 协作下交付，能读、能改、能排障。
 
-<sub>[English version ↓](#english)</sub>
+广州 · 英语可作为工作语言 · 可远程
 
 ---
 
 ## 在做的东西
 
-**[semif-gate](https://github.com/Tania-X/semif-gate)** — Agent 决策网关（**Java 17**）
-把"模型的判定"变成可缓存、可计量、可审计的基础设施：完整概率分布、契约指纹进缓存键、
-降级永远 fail-closed 而不是猜一个。这个项目我故意只用 Java 写，不引入 Spring、不接数据库 ——
-证明"AI 基础设施"不一定得是 Python 栈。
-→ **181 个测试。不连外网、不需要数据库、不需要 GPU。**
+**[dify-rag-lab](https://github.com/Tania-X/dify-rag-lab)** — 企业知识库 RAG 问答（**Java 17 / Spring Boot**）
+Dify 负责切块、向量化和检索，外面套一层 Spring Boot 网关：鉴权、聚合、审计都在网关里，前端不碰 Dify 的 API Key。
+为了搞清楚 Dify 的检索到底多做了什么，自己写了一版混合检索（向量召回 + BM25），拿 14 条评测题按 hit@1 / hit@5 对比两边。
 
 **[ai-tools](https://github.com/Tania-X/ai-tools)** — AI 代码审查引擎（Python，AI 协作开发）
-已在真实 PR 上跑 agentic 工具调用 + 质量门，封装为标准 MCP server，OpenTelemetry 全链路追踪。
-重点不在功能，在评测：黄金场景集按严重度分级统计精确率/召回率，改一次 prompt 是数字上的 diff，不是感觉。
-→ 同一场景集与 Claude Code **9/9 对齐**，且严重度策略是自发涌现的，没有被注入。
-
-**[ai-review-golden-tests](https://github.com/Tania-X/ai-review-golden-tests)** — 上面那套引擎的评测集
-带已知答案的场景矩阵，作为 CI 里的回归门禁。
+agent 多轮调用工具，对外是标准 MCP server，调用链用 OpenTelemetry 追踪。重点在评测：黄金场景集按严重度分级统计精确率和召回率，
+改一次 prompt 就是数字上的 diff。
+→ 同一批场景跟 Claude Code 逐条比过，9 个结论全部一致。
 
 **[devops-dashboard](https://github.com/Tania-X/devops-dashboard)** — 自建运维平台（Go + React，AI 协作开发）
-服务器资产、SSH 批量分发、许可证到期告警、Webhook 集成。Docker 多服务镜像、CI 推 ghcr.io、
-OpenTelemetry + Jaeger。**一个人从 0 做到上线并持续运维**，语言不是重点，交付完整度才是。
+服务器资产、SSH 批量分发、许可证到期告警。Docker 多服务镜像、CI 推 ghcr.io、OpenTelemetry + Jaeger。
+一个人从零做到上线，之后一直在上面运维。
+
+**同一账号下还有**：semif-gate（Java 17 写的 Agent 判定网关，181 个测试不连数据库、不需要 GPU）、
+ai-review-golden-tests（上面那套引擎的评测集），以及几个 RAG 和 agent 方向的实验。
 
 ---
 
-## 三件在我每个仓库里都能看到的事
+## 做事方式
 
-**先测量，再设计。** 我怀疑决策 prompt 里选项顺序有语义，就去测了一遍：只调换顺序，**30.6%** 的判定翻转；
-换一块 GPU，只动 **0.7%** —— 差 40 倍。所以顺序现在进了缓存键：复用旧结果在机制上不可能，
-而不是靠"记得升版本"。
+**契约先行：接口先定死，再写实现。** 金证那套 DevOps 平台是从 OpenAPI 契约开始的——契约用代码生成器出骨架，
+实现只能长在契约里面，AI 补的代码也一样。评审的时候看契约比看实现快得多。
 
-**公开改正自己的结论。** 三份设计文档里都留着对早期结论的明确更正，标注为更正，并链到推翻它的那次改动。
-没有悄悄改掉。一个能推翻我设计的测量，是最有价值的东西。
+**小步发布：一块做完就上一块。** 平台一期拆成组件管理、产品管理、版本管理、CI 触发四块，做完一块上一块，
+每块都能单独验证。个人项目也是这个路子：`devops-dashboard` 是一块一块加上去的，不是一次憋出来的。
 
-**把不变式放进类型系统，而不是放进约定。** `state.hash() == sha256(state.json())` 之所以恒成立，
-是因为能破坏它的构造函数不对外公开。"记得升版本"不是控制手段，一个撞不上的缓存键才是。
+**先跑通，再拆开看。** `dify-rag-lab` 一开始是拿 Dify 现成能力把链路跑通，跑通之后才自己写一版混合检索跟它对比
+——不这么做，就不知道 Dify 到底替你做了哪些事。
 
 ---
 
-**主力**：`Java` `Spring Boot / Cloud` `Spring Security` `Netty` `MyBatis` `JVM 排障`
-**数据**：`MySQL` `Redis` `Kafka` `RabbitMQ` `OceanBase` `Vastbase` `达梦`
-**工程**：`Docker` `Kubernetes` `Helm` `Jenkins` `GitHub Actions` `Vault` `Grafana` `OpenTelemetry`
-**AI 工程化**：`MCP` `LLM 路由与评测` `LLM-as-Judge` `Agent 工具调用`
+## 技术栈
+
+**Core**：`Java` `Spring Boot / Cloud` `Spring Security` `Netty` `MyBatis` `JVM 排障`
+**Data**：`MySQL` `Redis` `Kafka` `RabbitMQ` `OceanBase` `Vastbase` `Weaviate`
+**Engineering**：`Docker` `Kubernetes` `Jenkins` `GitHub Actions` `Grafana` `OpenTelemetry`
+**AI 工程化**：`RAG（切分 / 向量召回 / Rerank）` `hit@k 评测` `MCP` `Agent 工具调用` `LLM-as-Judge`
 
 📫 13126565350@163.com
 
 ---
-
-<a id="english"></a>
 
 <details>
-<summary><b>English version — click to expand</b></summary>
+<summary><b>English</b></summary>
 
-<br>
+### Su Siyuan / Max — Java backend engineer
 
-### Java backend engineer — I take a system from design to production and keep its behaviour auditable.
+Five years of Java, mostly trading systems for brokerages: a service architecture rework, an RBAC rebuild,
+and a domestic-database migration validated against production traffic in parallel. Since 2026 I've been
+working on DevOps platforms and LLM application delivery.
 
-Five years of Java, starting in securities trading systems. For the past year I've been doing
-engineering work on LLM applications: evaluation sets for model output, a decision gateway that
-caches and audits every verdict, and OpenTelemetry tracing through the whole call path. Two things
-I actually care about — the same input twice gives the same result, and changing a prompt shows up
-as a number in CI.
+Two things I care about: the same input twice gives the same result, and a prompt change shows up as a number in CI.
 
-Java is my main stack. The Python / Go / React side gets delivered with AI in the loop: I can read
-it, change it, and debug it.
+Java is my main stack. Python / Go / React get delivered with AI in the loop — I can read, change, and debug them.
 
-Based in Guangzhou (UTC+8) · English working environment · open to remote collaboration
+Guangzhou, China · English as a working language
 
----
+**Projects**
 
-#### What I'm building
-
-**[semif-gate](https://github.com/Tania-X/semif-gate)** — an agent decision gateway (**Java 17**)
-Turns a model verdict into cacheable, metered, auditable infrastructure: full probability
-distribution, contract fingerprint inside the cache key, degradation that always fails closed
-rather than guessing. Deliberately written in plain Java — no Spring, no database — to show that
-agent infrastructure doesn't have to be a Python stack.
-→ 181 tests. No network, no database, no GPU.
-
-**[ai-tools](https://github.com/Tania-X/ai-tools)** — an AI code review engine (Python, built with AI)
-Agentic review with tool calling on real PRs, packaged as an MCP server, traced end-to-end with
-OpenTelemetry. The part that matters is the evaluation: a golden scenario set scores precision and
-recall *per severity level*, so changing a prompt is a diff in numbers instead of an opinion.
-→ 9/9 parity against Claude Code on the same scenario set — and the same severity rules emerged
-without being injected.
-
-**[ai-review-golden-tests](https://github.com/Tania-X/ai-review-golden-tests)** — the evaluation set
-behind the engine above. A scenario matrix with known-good answers, used as a regression gate in CI.
-
-**[devops-dashboard](https://github.com/Tania-X/devops-dashboard)** — a self-hosted ops platform
-(Go + React, built with AI)
-Server inventory, SSH fan-out, licence expiry alerting, webhook integrations. Docker multi-service
-images, CI to ghcr.io, OpenTelemetry + Jaeger. Built and operated end-to-end, alone — the language
-isn't the point, the completeness of delivery is.
-
----
-
-#### Three things you'll find in every repo here
-
-**I measure instead of guessing.** I suspected option ordering in our decision prompts was
-semantically meaningful, so I measured it: reordering options flipped 30.6% of decisions, while
-swapping the GPU moved them 0.7% — a 40× difference. The order is now part of the cache key,
-so reusing a stale result is mechanically impossible rather than a matter of remembering to
-bump a version.
-
-**I correct myself in public.** Three of my design documents carry an explicit correction of an
-earlier conclusion, labelled as a correction, linked from the change that overturned it. Not
-quietly edited. A measurement that contradicts my design is the most useful thing I can get.
-
-**I put invariants in the type system, not in a convention.** `state.hash() == sha256(state.json())`
-holds because the constructor that would break it isn't public. "Remember to bump the version"
-is not a control; a cache key that can't collide is.
-
----
-
-**Core**: `Java` `Spring Boot / Cloud` `Spring Security` `Netty` `MyBatis` `JVM troubleshooting`
-**Data**: `MySQL` `Redis` `Kafka` `RabbitMQ` `OceanBase`
-**Engineering**: `Docker` `Kubernetes` `Helm` `Jenkins` `GitHub Actions` `Vault` `Grafana` `OpenTelemetry`
-**AI engineering**: `MCP` `LLM routing & evaluation` `LLM-as-judge` `agent tool calling`
-
-📫 13126565350@163.com
+- [dify-rag-lab](https://github.com/Tania-X/dify-rag-lab) — RAG knowledge-base Q&A. Spring Boot gateway in front of Dify;
+  a hand-written hybrid retriever (vector recall + BM25) benchmarked against Dify's retrieval on 14 questions with hit@1 / hit@5.
+- [ai-tools](https://github.com/Tania-X/ai-tools) — agentic code review engine, exposed as an MCP server, traced with OpenTelemetry.
+  Golden scenario set scores precision/recall per severity; 9/9 parity against Claude Code on the same set.
+- [devops-dashboard](https://github.com/Tania-X/devops-dashboard) — self-hosted ops platform (Go + React). Docker images,
+  CI to ghcr.io, OpenTelemetry + Jaeger. Built and operated end-to-end.
 
 </details>
